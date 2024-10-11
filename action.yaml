@@ -1,9 +1,5 @@
 name: "Ory CLI"
-description: "Authenticate and run Ory CLI commands"
-author: "Luka Giorgadze"
-branding:
-  icon: "command"
-  color: "gray-dark"
+description: "Install and authenticate with Ory CLI"
 inputs:
   username:
     description: "Ory username"
@@ -11,15 +7,15 @@ inputs:
   password:
     description: "Ory password"
     required: true
-  commands:
-    description: "Newline-separated list of Ory CLI commands to run"
+  version:
+    description: "Ory CLI Version"
     required: true
 runs:
   using: "composite"
   steps:
     - run: sudo apt-get install -y expect
       shell: bash
-    - run: bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b . ory && sudo mv ./ory /usr/local/bin/
+    - run: bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b . ory ${{ inputs.version }} && sudo mv ./ory /usr/local/bin/
       shell: bash
     - run: |
         /usr/bin/expect <<'EOF'
@@ -33,13 +29,3 @@ runs:
         expect eof
         EOF
       shell: bash
-    - name: Run commands
-      run: |
-        IFS=$'\n'
-        for command in $COMMANDS
-        do
-          eval "/usr/local/bin/ory $command"
-        done
-      shell: bash
-      env:
-        COMMANDS: ${{ inputs.commands }}
